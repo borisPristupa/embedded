@@ -1,8 +1,6 @@
-import kotlinx.coroutines.delay
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 
-suspend fun main() {
-    for (c in "Hello") {
-        println(c)
-        delay(300)
-    }
+fun main() {
+    embeddedServer(Netty, 8080) {runServer()}.start(wait = true)
 }
