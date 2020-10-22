@@ -1,13 +1,13 @@
 package itmo.embedded.tcp
 
 import io.ktor.util.*
-import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.junit.After
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.BufferedReader
 import java.io.PrintWriter
 import java.net.Socket
@@ -22,8 +22,8 @@ class TcpClientTest {
 
     companion object {
         @JvmStatic
-        @BeforeClass
-        fun beforeClass() {
+        @BeforeAll
+        fun beforeAll() {
             GlobalScope.launch {
                 startTcpServer(HOST, PORT) {
                     while (true) {
@@ -34,14 +34,14 @@ class TcpClientTest {
         }
     }
 
-    @Before
+    @BeforeEach
     fun setUp() {
         val socket = Socket(HOST, PORT)
         input = socket.getInputStream().bufferedReader()
         output = PrintWriter(socket.getOutputStream())
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         input.close()
         output.close()
