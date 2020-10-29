@@ -14,9 +14,7 @@ class InputOutputContext(private val inputChannel: ByteReadChannel, private val 
     /** Blocks until a new line character is met
      *
      * @throws IOException if the channel have been closed */
-    suspend fun readLine(): String {
-        return inputChannel.readUTF8Line() ?: throw IOException("The channel is closed")
-    }
+    suspend fun readLine(): String = inputChannel.readUTF8Line() ?: throw IOException("The channel is closed")
 
     @KtorExperimentalAPI
     suspend fun write(str: String) {
