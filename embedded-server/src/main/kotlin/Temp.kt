@@ -20,7 +20,7 @@ fun main(): Unit = runBlocking {
         processQueries()
     }
     GlobalScope.launch {
-        startTcpServer("127.0.0.1", 80) {
+        startTcpServer("192.168.1.2", 80) {
             while (true) {
                 val input = try {
                     readLine()
