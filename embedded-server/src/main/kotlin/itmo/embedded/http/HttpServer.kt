@@ -16,6 +16,9 @@ fun Application.runServer() {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, GsonConverter())
     }
+    install(CORS) {
+        anyHost()
+    }
     routing {
         get("/gps") {
             println("new request")

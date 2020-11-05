@@ -2,18 +2,19 @@ package itmo.embedded.tcp
 
 import io.ktor.util.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.junit.jupiter.api.AfterEach
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.io.BufferedReader
+import java.io.IOException
 import java.io.PrintWriter
 import java.net.Socket
+import java.time.Duration
 
 private const val HOST = "127.0.0.1"
-private const val PORT = 80
+private const val PORT = 801
 
 @KtorExperimentalAPI
 class TcpClientTest {
@@ -27,9 +28,16 @@ class TcpClientTest {
             GlobalScope.launch {
                 startTcpServer(HOST, PORT) {
                     while (true) {
-                        write("${readLine()}\n")
+                        try {
+                            write("${readLine()}\n")
+                        } catch (io: IOException) {
+                            break
+                        }
                     }
                 }
+            }
+            runBlocking {
+                delay(1000) // let the server start
             }
         }
     }
@@ -56,7 +64,10 @@ class TcpClientTest {
             .forEach {
                 output.println(it)
                 output.flush()
-                assertEquals(it, input.readLine())
+                val answer = assertTimeout(Duration.ofSeconds(2)) {
+                    input.readLine()
+                }
+                assertEquals(it, answer)
             }
     }
 }

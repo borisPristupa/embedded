@@ -8,7 +8,6 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.util.*
 import itmo.embedded.http.runServer
-import itmo.embedded.tcp.TcpClientTest
 import itmo.embedded.tcp.startTcpServer
 import kotlinx.coroutines.*
 import model.Update
@@ -55,6 +54,9 @@ class FromTcpToHttpTest {
             }
             GlobalScope.launch {
                 embeddedServer(Netty, HTTP_PORT, host = HOST) { runServer() }.start(wait = true)
+            }
+            runBlocking {
+                delay(1000) // just for the servers to start
             }
         }
     }

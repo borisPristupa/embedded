@@ -4,23 +4,34 @@ import io.ktor.util.*
 import io.ktor.utils.io.errors.*
 import itmo.embedded.http.runServer
 import itmo.embedded.tcp.startTcpServer
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import model.Update
 import model.UpdateStorage
 import model.WriteQuery
 import model.processQueries
+import java.net.Inet4Address
+import java.net.InetAddress
+import java.net.UnknownHostException
+
+const val DEFAULT_TCP_HOST = "192.168.1.2"
+
+fun isValidHost(host: String): Boolean = try {
+    InetAddress.getByName(host)
+    true
+} catch (e: UnknownHostException) {
+    false
+}
 
 @KtorExperimentalAPI
-fun main(): Unit = runBlocking {
+suspend fun main(args: Array<String>): Unit = coroutineScope {
+    val tcpHost = if (args.isNotEmpty() && isValidHost(args[0])) args[0] else DEFAULT_TCP_HOST
+
     UpdateStorage.createChannel()
-    GlobalScope.async {
+    launch {
         processQueries()
     }
-    GlobalScope.launch {
-        startTcpServer("192.168.1.2", 80) {
+    launch {
+        startTcpServer(tcpHost, 80) {
             while (true) {
                 val input = try {
                     readLine()

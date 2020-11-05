@@ -34,6 +34,21 @@ compileKotlin {
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
+jar {
+    def mainClass = 'ServerInstantiationKt'
+    def dataSimulationClass = 'DataSimulationKt'
+
+    if (project.hasProperty('simulateData')) {
+        archiveName 'simulateData.jar'
+    }
+    manifest {
+        attributes('Main-Class': project.hasProperty('simulateData') ? dataSimulationClass : mainClass)
+    }
+    // This line of code recursively collects and copies all of a project's files
+    // and adds them to the JAR itself. One can extend this task, to skip certain
+    // files or particular types at will
+    from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+}
 
 test {
     useJUnitPlatform()
