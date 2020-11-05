@@ -8,7 +8,7 @@ export default function Optional(props: any) {
     const [data, setData] = useState('')
 
     const onPress = () => {
-        fetch('https://run.mocky.io/v3/c99b753a-52e8-4903-a6c0-f51e11d2e6b4')
+        fetch('http://localhost:8080/gps')
             .then(response => {
                 if (!response.ok) {
                     createTwoButtonAlert()
