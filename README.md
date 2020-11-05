@@ -1,7 +1,8 @@
 # Как стать готовым что-то запустить
-Сгенерите артефактики для сервера: из `embedded-server` запустите
-  - `gradlew build -x test`
-  - `gradlew build -x test -PsimulateData`
+Для начала нужно установить `gradle`
+Затем сгенерите артефактики для сервера: из `embedded-server` запустите
+  - `gradle build -x test`
+  - `gradle build -x test -PsimulateData`
 
 # Как запустить что-нибудь
 Артефактики из прошлого пункта можно не пересобирать каждый раз
