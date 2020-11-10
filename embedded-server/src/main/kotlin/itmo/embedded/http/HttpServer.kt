@@ -8,9 +8,7 @@ import io.ktor.routing.*
 import io.ktor.gson.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
-import model.ReadQuery
-import model.Update
-import model.UpdateStorage
+import model.*
 
 fun Application.runServer() {
     install(ContentNegotiation) {
@@ -30,6 +28,28 @@ fun Application.runServer() {
                 channel.send(ReadQuery(result))
             }
             result.await()?.let { r -> call.respond(r) } ?: call.respond(HttpStatusCode.NotFound, "no actual data")
+        };
+        get("/manage") {
+            try {
+                val speed = call.parameters["speed"]!!.toInt()
+                val port = call.parameters["port"]!!.toInt()
+                when (val r = validateParams(speed, port)) {
+                    null -> {
+                        val newCommand = Command(speed, port)
+                        // todo() send to tcp
+                        println("New command: port #$port to speed $speed")
+                        call.respond(HttpStatusCode.OK)
+                    }
+                    else -> {
+                        /* 401 - validation error */
+                        call.respond(HttpStatusCode.BadRequest, r)
+                    }
+                }
+            } catch (e: NullPointerException) {
+                println("Illegal url params")
+                /* 404 - not enough url params   */
+                call.respond(HttpStatusCode.NotFound, "Request must include port and speed")
+            }
         }
     }
 }
