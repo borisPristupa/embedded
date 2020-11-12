@@ -24,15 +24,41 @@ fun Application.runServer() {
     }
     routing {
         get("/gps") {
-            println("new request")
             val channel = UpdateStorage.channel
             val result = CompletableDeferred<Update?>()
             launch {
-                /* just for test */
-//                UpdateStorage.channel.send(WriteQuery(Update("test data")))
-                channel.send(ReadQuery(result))
+                channel.send(UpdateReadQuery(result, 1))
             }
             result.await()?.let { r -> call.respond(r) } ?: call.respond(HttpStatusCode.NotFound, "no actual data")
+        }
+        get("/data") {
+            try {
+                val port = call.parameters["port"]!!.toInt()
+                when (val r = validatePort(port)) {
+                    null -> {
+                        val gpsChannel = UpdateStorage.channel
+                        val result = CompletableDeferred<Update?>()
+                        launch {
+                            gpsChannel.send(UpdateReadQuery(result, port))
+                        }
+                        result.await()?.let { res -> call.respond(res) } ?: call.respond(
+                            HttpStatusCode.NotFound,
+                            "no actual data"
+                        )
+                    }
+                    else -> {
+                        /* 401 - validation error */
+                        call.respond(HttpStatusCode.BadRequest, r)
+                    }
+                }
+            } catch (e: NullPointerException) {
+                println("data(): Illegal url params")
+                /* 404 - not enough url params   */
+                call.respond(HttpStatusCode.NotFound, "Request must include port")
+            } catch (e: IllegalArgumentException) {
+                println("data(): Illegal argument value ::toInt")
+                call.respond(HttpStatusCode.BadRequest, "Check parameters. Must be numbers")
+            }
         }
         get("/manage") {
             try {
@@ -40,8 +66,8 @@ fun Application.runServer() {
                 val port = call.parameters["port"]!!.toInt()
                 when (val r = validateParamsForSpeed(speed, port)) {
                     null -> {
-                        val newCommand = CommandSpeed(speed, port)
-                        // todo() send to tcp
+                        val commandChannel = CommandManagement.commandChannel
+                        commandChannel.send(CommandRequest(CommandSpeed(speed, port)))
                         println("New command: port #$port to speed $speed")
                         call.respond(HttpStatusCode.OK)
                     }
@@ -51,11 +77,11 @@ fun Application.runServer() {
                     }
                 }
             } catch (e: NullPointerException) {
-                println("Illegal url params")
+                println("manage(): Illegal url params")
                 /* 404 - not enough url params   */
                 call.respond(HttpStatusCode.NotFound, "Request must include port and speed")
             } catch (e: IllegalArgumentException) {
-                println("Illegal argument value ::toInt")
+                println("manage(): Illegal argument value ::toInt")
                 call.respond(HttpStatusCode.BadRequest, "Check parameters. Must be numbers")
             }
         }
@@ -80,11 +106,11 @@ fun Application.runServer() {
                     }
                 }
             } catch (e: NullPointerException) {
-                println("Illegal url params")
+                println("change_port_state(): Illegal url params")
                 /* 404 - not enough url params   */
                 call.respond(HttpStatusCode.NotFound, "Request must include port and state")
             } catch (e: IllegalArgumentException) {
-                println("Illegal argument value ::toInt")
+                println("change_port_state(): Illegal argument value ::toInt")
                 call.respond(HttpStatusCode.BadRequest, "Check parameters. Port and state must be numbers")
             }
         }

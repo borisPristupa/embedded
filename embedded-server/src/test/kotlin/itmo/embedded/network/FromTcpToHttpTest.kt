@@ -12,8 +12,8 @@ import itmo.embedded.tcp.startTcpServer
 import kotlinx.coroutines.*
 import model.Update
 import model.UpdateStorage
-import model.WriteQuery
-import model.processQueries
+import model.UpdateWriteQuery
+import model.processCommandQueries
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -38,7 +38,7 @@ class FromTcpToHttpTest {
         fun beforeAll() {
             UpdateStorage.createChannel()
             GlobalScope.launch {
-                processQueries()
+                processCommandQueries()
             }
             GlobalScope.launch {
                 startTcpServer(HOST, TCP_PORT) {
@@ -48,7 +48,7 @@ class FromTcpToHttpTest {
                         } catch (io: IOException) {
                             break
                         }
-                        UpdateStorage.channel.send(WriteQuery(Update(input)))
+                        UpdateStorage.channel.send(UpdateWriteQuery(Update(input)))
                     }
                 }
             }

@@ -5,11 +5,7 @@ import io.ktor.utils.io.errors.*
 import itmo.embedded.http.runServer
 import itmo.embedded.tcp.startTcpServer
 import kotlinx.coroutines.*
-import model.Update
-import model.UpdateStorage
-import model.WriteQuery
-import model.processQueries
-import java.net.Inet4Address
+import model.*
 import java.net.InetAddress
 import java.net.UnknownHostException
 
@@ -27,8 +23,12 @@ suspend fun main(args: Array<String>): Unit = coroutineScope {
     val tcpHost = if (args.isNotEmpty() && isValidHost(args[0])) args[0] else DEFAULT_TCP_HOST
 
     UpdateStorage.createChannel()
+    CommandManagement.createChannel()
     launch {
-        processQueries()
+        processCommandQueries()
+    }
+    launch {
+        processUpdateQueries()
     }
     launch {
         startTcpServer(tcpHost, 80) {
@@ -38,7 +38,8 @@ suspend fun main(args: Array<String>): Unit = coroutineScope {
                 } catch (io: IOException) {
                     break
                 }
-                UpdateStorage.channel.send(WriteQuery(Update(input)))
+                /* todo() here will be parser: input string (port_number&nmea_data) -> (port, pdate) */
+                UpdateStorage.channel.send(UpdateWriteQuery(Update(input), 1))
             }
         }
     }
