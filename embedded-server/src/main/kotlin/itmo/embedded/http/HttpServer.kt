@@ -47,16 +47,16 @@ fun Application.runServer() {
                         )
                     }
                     else -> {
-                        /* 401 - validation error */
+                        log.error("401 - validation error")
                         call.respond(HttpStatusCode.BadRequest, r)
                     }
                 }
             } catch (e: NullPointerException) {
-                println("data(): Illegal url params")
-                /* 404 - not enough url params   */
+                log.error("data(): Illegal url params")
+                log.error("404 - not enough url params")
                 call.respond(HttpStatusCode.NotFound, "Request must include port")
             } catch (e: IllegalArgumentException) {
-                println("data(): Illegal argument value ::toInt")
+                log.error("data(): Illegal argument value ::toInt")
                 call.respond(HttpStatusCode.BadRequest, "Check parameters. Must be numbers")
             }
         }
@@ -68,35 +68,34 @@ fun Application.runServer() {
                     null -> {
                         val commandChannel = CommandManagement.commandChannel
                         commandChannel.send(CommandRequest(CommandSpeed(speed, port)))
-                        println("New command: port #$port to speed $speed")
+                        log.debug("New command: port #$port to speed $speed")
                         call.respond(HttpStatusCode.OK)
                     }
                     else -> {
-                        /* 401 - validation error */
+                        log.error("401 - validation error")
                         call.respond(HttpStatusCode.BadRequest, r)
                     }
                 }
             } catch (e: NullPointerException) {
-                println("manage(): Illegal url params")
-                /* 404 - not enough url params   */
+                log.error("404 - not enough url params - port and speed")
                 call.respond(HttpStatusCode.NotFound, "Request must include port and speed")
             } catch (e: IllegalArgumentException) {
-                println("manage(): Illegal argument value ::toInt")
+                log.error("manage(): Illegal argument value ::toInt")
                 call.respond(HttpStatusCode.BadRequest, "Check parameters. Must be numbers")
             }
         }
         get("/change_port_state") {
             try {
                 val port = call.parameters["port"]!!.toInt()
-                val state = call.parameters["state"]!!.toInt()
+                val state = call.parameters["state"]!!.toString()
                 when (val r = validateParamsForState(port, state)) {
                     null -> {
                         val newCommand = CommandState(port, state)
                         // todo() send to tcp
-                        if (state == 1) {
-                            println("New command: port #$port to state On")
+                        if (state.contains("on")) {
+                            log.debug("New command: port #$port to state On")
                         } else {
-                            println("New command: port #$port to state Off")
+                            log.debug("New command: port #$port to state Off")
                         }
                         call.respond(HttpStatusCode.OK, "State switched!")
                     }
@@ -106,12 +105,12 @@ fun Application.runServer() {
                     }
                 }
             } catch (e: NullPointerException) {
-                println("change_port_state(): Illegal url params")
-                /* 404 - not enough url params   */
+                log.error("change_port_state(): Illegal url params")
+                log.error("404 - not enough url params - port and state")
                 call.respond(HttpStatusCode.NotFound, "Request must include port and state")
             } catch (e: IllegalArgumentException) {
-                println("change_port_state(): Illegal argument value ::toInt")
-                call.respond(HttpStatusCode.BadRequest, "Check parameters. Port and state must be numbers")
+                log.error("change_port_state(): Illegal argument value ::toInt")
+                call.respond(HttpStatusCode.BadRequest, "Check parameters. Port must be number")
             }
         }
     }

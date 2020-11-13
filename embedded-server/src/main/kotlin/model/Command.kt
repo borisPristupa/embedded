@@ -5,7 +5,7 @@ import kotlinx.coroutines.channels.Channel
 class CommandRequest(val commandSpeed: CommandSpeed)
 
 data class CommandSpeed(val speed: Int, val port: Int)
-data class CommandState(val port: Int, val state: Int)
+data class CommandState(val port: Int, val state: String)
 
 object CommandManagement {
     lateinit var commandChannel: Channel<CommandRequest>
@@ -25,9 +25,9 @@ fun validateParamsForSpeed(speed: Int, port: Int): String? {
     else null
 }
 
-fun validateParamsForState(port: Int, state: Int): String? {
+fun validateParamsForState(port: Int, state: String): String? {
     return if (port < 0) "Illegal port value"
-    else if (!(port == 1 || port == 0)) "Illegal state value"
+    else if (!(state.contains("on") || state.contains("off"))) "Illegal state value"
     else null
 }
 
