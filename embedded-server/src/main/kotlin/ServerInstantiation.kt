@@ -38,8 +38,7 @@ suspend fun main(args: Array<String>): Unit = coroutineScope {
                 } catch (io: IOException) {
                     break
                 }
-                /* todo() here will be parser: input string (port_number&nmea_data) -> (port, pdate) */
-                UpdateStorage.channel.send(UpdateWriteQuery(Update(input), 1))
+                UpdateStorage.channel.send(convertNmeaToJson(input))
             }
         }
     }

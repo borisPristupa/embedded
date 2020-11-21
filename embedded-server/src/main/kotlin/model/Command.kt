@@ -15,8 +15,9 @@ object CommandManagement {
     }
 }
 
-fun validatePort(port: Int): String? {
-    return if (port in 1..3) null else "Unknown port"
+//FIXME: порт не так проверять --- не пофиксить, пока нет списка
+fun validatePort(port: String): String? {
+    return if (port.toInt() in 1..3) null else "Unknown port"
 }
 
 fun validateParamsForSpeed(speed: Int, port: Int): String? {

@@ -12,6 +12,7 @@ import model.*
 
 /**
  * /gps -
+ * /data -
  * /manage - change speed for specified port. Port::Int, Speed::Int
  * /change_port_state - change port state. Port::Int, State::Boolean - True:on, False:Off
  */
@@ -27,13 +28,13 @@ fun Application.runServer() {
             val channel = UpdateStorage.channel
             val result = CompletableDeferred<Update?>()
             launch {
-                channel.send(UpdateReadQuery(result, 1))
+                channel.send(UpdateReadQuery(result, "1"))
             }
             result.await()?.let { r -> call.respond(r) } ?: call.respond(HttpStatusCode.NotFound, "no actual data")
         }
         get("/data") {
             try {
-                val port = call.parameters["port"]!!.toInt()
+                val port = call.parameters["port"]!!
                 when (val r = validatePort(port)) {
                     null -> {
                         val gpsChannel = UpdateStorage.channel
@@ -100,7 +101,7 @@ fun Application.runServer() {
                         call.respond(HttpStatusCode.OK, "State switched!")
                     }
                     else -> {
-                        /* 401 - validation error */
+                        log.error("401 - validation error")
                         call.respond(HttpStatusCode.BadRequest, r)
                     }
                 }
