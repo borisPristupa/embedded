@@ -1,14 +1,11 @@
 package model
 
-import io.ktor.application.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
-import java.util.logging.Logger
-import kotlin.math.log
 
 /**
  * От stm раз в секунду (+/-) приходит сообщение с новыми данными
- * Это сообщение содержит № порта и информацию от этого порта(????)
+ * Это сообщение содержит № порта и информацию от этого порта
  * --- данные от разных портов похожи по структуре или нет....
  * full-duplex?????
  * Это сообщение нужно распарсить, и сохранить в map dataMap - ключ = № порта
@@ -30,7 +27,7 @@ data class Update(
     val checksum: String?
 )
 
-open class Query()
+open class Query
 class UpdateReadQuery(val result: CompletableDeferred<Update?>, val portNumber: String) : Query()
 class UpdateWriteQuery(val update: Update, val portNumber: String) : Query()
 
@@ -49,34 +46,41 @@ object UpdateStorage {
         lastUpdate = newUpdate
     }
 
-    fun getUpdate(potNumber: String): Update? {
-        return dataMap[potNumber]
+    fun getUpdate(portNumber: String): Update? {
+        return dataMap[portNumber]
     }
 }
 
 fun convertNmeaToJson(nmeaText: String): UpdateWriteQuery? {
-   try {
+    try {
         val port = nmeaText.substring(1, nmeaText.indexOf("$"))
-        println("new update from port $port")
-        val nmeaTextVars = nmeaText.substring(nmeaText.indexOf(",") + 1)
-        val vars_array = nmeaTextVars.split(",")
-        val update = Update(
-            vars_array[0],
-            vars_array[1],
-            vars_array[2],
-            vars_array[3],
-            vars_array[4],
-            vars_array[5],
-            vars_array[6],
-            vars_array[7],
-            vars_array[8],
-            vars_array[9],
-            vars_array[10].substring(0, 1),
-            vars_array[10].substring(1)
-        )
-        return UpdateWriteQuery(update, port)
+        if (validatePort(port).isNullOrEmpty()) {
+            println("new update from port $port")
+            val nmeaTextVars = nmeaText.substring(nmeaText.indexOf(",") + 1)
+            val varsArray = nmeaTextVars.split(",")
+            val update = Update(
+                varsArray[0],
+                varsArray[1],
+                varsArray[2],
+                varsArray[3],
+                varsArray[4],
+                varsArray[5],
+                varsArray[6],
+                varsArray[7],
+                varsArray[8],
+                varsArray[9],
+                varsArray[10].substring(0, 1),
+                varsArray[10].substring(1)
+            )
+            return UpdateWriteQuery(update, port)
+        } else {
+            // todo() log.error()
+            println("parse: illegal port")
+            return null
+        }
     } catch (e: StringIndexOutOfBoundsException) {
-        print("parse() - failed")
+        // todo() log.error
+        println("parse failed - illegal vars number")
         return null
     }
 }
@@ -89,16 +93,19 @@ fun convertNmeaToJson(nmeaText: String): UpdateWriteQuery? {
 // todo() write to log file
 suspend fun processUpdateQueries(chanel: Channel<Query> = UpdateStorage.channel) {
     for (element in chanel) {
-        println(element)
         when (element) {
             is UpdateReadQuery -> {
-                println("new read() "+UpdateStorage.getUpdate(element.portNumber))
+                println("NEW READ REQUEST: " + UpdateStorage.getUpdate(element.portNumber))
                 element.result.complete(UpdateStorage.getUpdate(element.portNumber))
             }
             is UpdateWriteQuery -> {
                 UpdateStorage.update(element.portNumber, element.update)
-                println("new update() "+UpdateStorage.getUpdate(element.portNumber))
+                println("NEW UPDATE REQUEST: " + UpdateStorage.getUpdate(element.portNumber))
             }
         }
     }
 }
+
+
+//   <com1$GPGSV,3,1,11,10,63,137,17,07,61,098,15,05,59,290,20,08,54,157,30*70
+//   <com1$GPGSV,2,1,07,04,62,120,47,09,52,292,53,07,42,044,41,24,38,179,45*7B

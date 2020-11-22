@@ -38,7 +38,7 @@ suspend fun main(args: Array<String>): Unit = coroutineScope {
                 } catch (io: IOException) {
                     break
                 }
-                UpdateStorage.channel.send(convertNmeaToJson(input))
+                convertNmeaToJson(input)?.let { UpdateStorage.channel.send(it) }
             }
         }
     }
