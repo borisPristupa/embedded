@@ -1,10 +1,10 @@
 package model
 
-import com.google.gson.Gson
-import io.ktor.gson.*
+import io.ktor.application.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
+import java.util.logging.Logger
+import kotlin.math.log
 
 /**
  * От stm раз в секунду (+/-) приходит сообщение с новыми данными
@@ -15,18 +15,19 @@ import kotlinx.coroutines.coroutineScope
  *
  */
 
-data class Update(val time: String?,
-                    val validity: String?,
-                    val current_latitude: String?,
-                    val north_or_south: String?,
-                    val current_longitude: String?,
-                    val east_or_west: String?,
-                    val speed_in_knots: String?,
-                    val true_course: String?,
-                    val ut_date: String?,
-                    val variation: String?,
-                    val east_or_west_2: String?,
-                    val checksum: String?
+data class Update(
+    val time: String?,
+    val validity: String?,
+    val current_latitude: String?,
+    val north_or_south: String?,
+    val current_longitude: String?,
+    val east_or_west: String?,
+    val speed_in_knots: String?,
+    val true_course: String?,
+    val ut_date: String?,
+    val variation: String?,
+    val east_or_west_2: String?,
+    val checksum: String?
 )
 
 open class Query()
@@ -53,13 +54,31 @@ object UpdateStorage {
     }
 }
 
-fun convertNmeaToJson(nmeaText: String): UpdateWriteQuery {
-    val port = nmeaText.substring(1, nmeaText.indexOf("$"))
-    val nmeaTextVars = nmeaText.substring(nmeaText.indexOf(",") + 1)
-    val vars_array = nmeaTextVars.split(",")
-    val update = Update(vars_array[0], vars_array[1], vars_array[2], vars_array[3], vars_array[4],
-            vars_array[5], vars_array[6], vars_array[7], vars_array[8], vars_array[9], vars_array[10].substring(0,1), vars_array[10].substring(1))
-    return UpdateWriteQuery(update, port)
+fun convertNmeaToJson(nmeaText: String): UpdateWriteQuery? {
+   try {
+        val port = nmeaText.substring(1, nmeaText.indexOf("$"))
+        println("new update from port $port")
+        val nmeaTextVars = nmeaText.substring(nmeaText.indexOf(",") + 1)
+        val vars_array = nmeaTextVars.split(",")
+        val update = Update(
+            vars_array[0],
+            vars_array[1],
+            vars_array[2],
+            vars_array[3],
+            vars_array[4],
+            vars_array[5],
+            vars_array[6],
+            vars_array[7],
+            vars_array[8],
+            vars_array[9],
+            vars_array[10].substring(0, 1),
+            vars_array[10].substring(1)
+        )
+        return UpdateWriteQuery(update, port)
+    } catch (e: StringIndexOutOfBoundsException) {
+        print("parse() - failed")
+        return null
+    }
 }
 
 /*fun main(args: Array<String>) {
@@ -67,17 +86,18 @@ fun convertNmeaToJson(nmeaText: String): UpdateWriteQuery {
     print(Gson().toJson(query))
 }*/
 
+// todo() write to log file
 suspend fun processUpdateQueries(chanel: Channel<Query> = UpdateStorage.channel) {
     for (element in chanel) {
         println(element)
         when (element) {
             is UpdateReadQuery -> {
-                println(UpdateStorage.getUpdate(element.portNumber))
+                println("new read() "+UpdateStorage.getUpdate(element.portNumber))
                 element.result.complete(UpdateStorage.getUpdate(element.portNumber))
             }
             is UpdateWriteQuery -> {
                 UpdateStorage.update(element.portNumber, element.update)
-                println(UpdateStorage.getUpdate(element.portNumber))
+                println("new update() "+UpdateStorage.getUpdate(element.portNumber))
             }
         }
     }

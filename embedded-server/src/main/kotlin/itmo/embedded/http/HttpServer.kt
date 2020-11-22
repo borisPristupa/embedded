@@ -11,10 +11,11 @@ import kotlinx.coroutines.launch
 import model.*
 
 /**
- * /gps -
- * /data -
- * /manage - change speed for specified port. Port::Int, Speed::Int
- * /change_port_state - change port state. Port::Int, State::Boolean - True:on, False:Off
+ * /gps - old version for version compatibility - no params
+ * /data - new version. Port::String (now - "comX", where X - number from 1 to 4)
+ *
+ * /manage - change speed for specified port. Port::String, Speed::Int
+ * /change_port_state - change port state. Port::String, State::Boolean - True:on, False:Off
  */
 fun Application.runServer() {
     install(ContentNegotiation) {
@@ -28,7 +29,7 @@ fun Application.runServer() {
             val channel = UpdateStorage.channel
             val result = CompletableDeferred<Update?>()
             launch {
-                channel.send(UpdateReadQuery(result, "1"))
+                channel.send(UpdateReadQuery(result, "com1"))
             }
             result.await()?.let { r -> call.respond(r) } ?: call.respond(HttpStatusCode.NotFound, "no actual data")
         }
@@ -63,12 +64,12 @@ fun Application.runServer() {
         }
         get("/manage") {
             try {
+                val port = call.parameters["port"]!!
                 val speed = call.parameters["speed"]!!.toInt()
-                val port = call.parameters["port"]!!.toInt()
-                when (val r = validateParamsForSpeed(speed, port)) {
+                when (val r = validateParamsForSpeed(port, speed)) {
                     null -> {
                         val commandChannel = CommandManagement.commandChannel
-                        commandChannel.send(CommandRequest(CommandSpeed(speed, port)))
+                        commandChannel.send(CommandRequest(CommandSpeed(port, speed)))
                         log.debug("New command: port #$port to speed $speed")
                         call.respond(HttpStatusCode.OK)
                     }
@@ -87,12 +88,14 @@ fun Application.runServer() {
         }
         get("/change_port_state") {
             try {
-                val port = call.parameters["port"]!!.toInt()
+                val port = call.parameters["port"]!!
                 val state = call.parameters["state"]!!.toString()
                 when (val r = validateParamsForState(port, state)) {
                     null -> {
                         val newCommand = CommandState(port, state)
-                        // todo() send to tcp
+                        // todo() if we decide to on/off port -> create another request, and add this request processing (-> processCommandQueries )
+                        /* val commandChannel = CommandManagement.commandChannel
+                        commandChannel.send(CommandRequest(port, state)) */
                         if (state.contains("on")) {
                             log.debug("New command: port #$port to state On")
                         } else {
