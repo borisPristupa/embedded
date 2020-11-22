@@ -44,7 +44,7 @@ fun Application.runServer() {
                         launch {
                             gpsChannel.send(UpdateReadQuery(result, port))
                         }
-                        val TooEarly = HttpStatusCode(425, "Too early");
+                        val TooEarly = HttpStatusCode(425, "Too early")
                         result.await()?.let { res -> call.respond(res) } ?: call.respond(
                             TooEarly, "no actual data"
                         )
@@ -93,7 +93,7 @@ fun Application.runServer() {
                 val state = call.parameters["state"]!!.toString()
                 when (val r = validateParamsForState(port, state)) {
                     null -> {
-//                        val newCommand = CommandState(port, state)
+                        //val newCommand = CommandState(port, state)
                         // todo() if we decide to on/off port -> create another request, and add this request processing (-> processCommandQueries )
                         /* val commandChannel = CommandManagement.commandChannel
                         commandChannel.send(CommandRequest(port, state)) */

@@ -45,7 +45,7 @@ fun validateParamsForState(port: String?, state: String): String? {
         else -> r
     }
 }
-
+// todo() write to log file
 suspend fun processCommandQueries(chanel: Channel<CommandRequest> = CommandManagement.commandChannel) {
     for (element in chanel) {
         println("next command: $element")

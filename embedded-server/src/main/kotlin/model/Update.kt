@@ -79,7 +79,7 @@ fun convertNmeaToJson(nmeaText: String): UpdateWriteQuery? {
             return null
         }
     } catch (e: StringIndexOutOfBoundsException) {
-        // todo() log.error
+        // todo() log.error()
         println("parse failed - illegal vars number")
         return null
     }
