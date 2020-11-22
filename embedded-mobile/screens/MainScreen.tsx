@@ -10,7 +10,7 @@ export default function MainScreen() {
             <Text style={styles.title}>Узнай что хочешь!</Text>
             <View style={styles.separator} lightColor="#473" darkColor="rgba(28,156,2,0.1)"/>
             <ScrollView style={styles.scroll}>
-                <Optional btnTitle="Button 1"/>
+                <Optional/>
             </ScrollView>
         </View>
     );
