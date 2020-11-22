@@ -18,6 +18,9 @@ import model.*
  * /manage - change speed for specified port. Port::String, Speed::Int
  * /change_port_state - change port state. Port::String, State::Boolean - True:on, False:Off
  */
+
+val TooEarly = HttpStatusCode(425, "Too early")
+
 fun Application.runServer() {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, GsonConverter())
@@ -32,7 +35,7 @@ fun Application.runServer() {
             launch {
                 channel.send(UpdateReadQuery(result, "com1"))
             }
-            result.await()?.let { r -> call.respond(r) } ?: call.respond(HttpStatusCode.NotFound, "no actual data")
+            result.await()?.let { r -> call.respond(r) } ?: call.respond(TooEarly, "no actual data")
         }
         get("/data") {
             try {
@@ -44,7 +47,6 @@ fun Application.runServer() {
                         launch {
                             gpsChannel.send(UpdateReadQuery(result, port))
                         }
-                        val TooEarly = HttpStatusCode(425, "Too early")
                         result.await()?.let { res -> call.respond(res) } ?: call.respond(
                             TooEarly, "no actual data"
                         )
