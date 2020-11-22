@@ -45,7 +45,7 @@ class FromTcpToHttpTest {
                         } catch (io: IOException) {
                             break
                         }
-                        UpdateStorage.channel.send(convertNmeaToJson(input))
+                        //UpdateStorage.channel.send(convertNmeaToJson(input))
                     }
                 }
             }
@@ -89,7 +89,7 @@ class FromTcpToHttpTest {
                         port = HTTP_PORT
                     }
                     //FIXME: sorry, I broke it :) will be fixed with converter function
-                    //assertEquals(it, update.rowData)
+//                    assertEquals(correctUpdate, update)
                 }
             }
 

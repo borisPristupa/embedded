@@ -11,8 +11,9 @@ import kotlinx.coroutines.launch
 import model.*
 
 /**
+ *  REQUESTS:
  * /gps - old version for version compatibility - no params
- * /data - new version. Port::String (now - "comX", where X - number from 1 to 4)
+ * /data - new version. Port::String (now - "comX", where X - number from 1 to 4, port name maybe will change)
  *
  * /manage - change speed for specified port. Port::String, Speed::Int
  * /change_port_state - change port state. Port::String, State::Boolean - True:on, False:Off
@@ -43,9 +44,9 @@ fun Application.runServer() {
                         launch {
                             gpsChannel.send(UpdateReadQuery(result, port))
                         }
+                        val TooEarly = HttpStatusCode(425, "Too early");
                         result.await()?.let { res -> call.respond(res) } ?: call.respond(
-                            HttpStatusCode.NotFound,
-                            "no actual data"
+                            TooEarly, "no actual data"
                         )
                     }
                     else -> {
@@ -83,7 +84,7 @@ fun Application.runServer() {
                 call.respond(HttpStatusCode.NotFound, "Request must include port and speed")
             } catch (e: IllegalArgumentException) {
                 log.error("manage(): Illegal argument value ::toInt")
-                call.respond(HttpStatusCode.BadRequest, "Check parameters. Must be numbers")
+                call.respond(HttpStatusCode.BadRequest, "Check parameters. Post is string, speed is number")
             }
         }
         get("/change_port_state") {
@@ -92,7 +93,7 @@ fun Application.runServer() {
                 val state = call.parameters["state"]!!.toString()
                 when (val r = validateParamsForState(port, state)) {
                     null -> {
-                        val newCommand = CommandState(port, state)
+//                        val newCommand = CommandState(port, state)
                         // todo() if we decide to on/off port -> create another request, and add this request processing (-> processCommandQueries )
                         /* val commandChannel = CommandManagement.commandChannel
                         commandChannel.send(CommandRequest(port, state)) */

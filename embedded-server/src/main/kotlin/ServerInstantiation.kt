@@ -18,6 +18,8 @@ fun isValidHost(host: String): Boolean = try {
     false
 }
 
+lateinit var sendToController: suspend (String) -> Unit
+
 @KtorExperimentalAPI
 suspend fun main(args: Array<String>): Unit = coroutineScope {
     val tcpHost = if (args.isNotEmpty() && isValidHost(args[0])) args[0] else DEFAULT_TCP_HOST
@@ -32,6 +34,7 @@ suspend fun main(args: Array<String>): Unit = coroutineScope {
     }
     launch {
         startTcpServer(tcpHost, 80) {
+            sendToController = { msg: String -> write(msg) }
             while (true) {
                 val input = try {
                     readLine()

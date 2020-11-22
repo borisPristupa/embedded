@@ -1,6 +1,7 @@
 package model
 
 import kotlinx.coroutines.channels.Channel
+import sendToController
 
 class CommandRequest(val commandSpeed: CommandSpeed)
 
@@ -48,7 +49,7 @@ fun validateParamsForState(port: String?, state: String): String? {
 suspend fun processCommandQueries(chanel: Channel<CommandRequest> = CommandManagement.commandChannel) {
     for (element in chanel) {
         println("next command: $element")
-//        val string = "${element.commandSpeed.port}&${element.commandSpeed.speed}"
-        // todo() send command to stm
+        val string = "${element.commandSpeed.port}&${element.commandSpeed.speed}"
+        sendToController(string)
     }
 }
