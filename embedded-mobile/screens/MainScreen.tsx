@@ -11,8 +11,6 @@ export default function MainScreen() {
             <View style={styles.separator} lightColor="#473" darkColor="rgba(28,156,2,0.1)"/>
             <ScrollView style={styles.scroll}>
                 <Optional btnTitle="Button 1"/>
-                <Optional btnTitle="Button 2"/>
-                <Optional btnTitle="Button 3"/>
             </ScrollView>
         </View>
     );
