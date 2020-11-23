@@ -83,6 +83,8 @@ const styles = StyleSheet.create({
     warning: {
         width: 130,
         height: 30,
+        marginHorizontal: 10,
+        textAlign:"center",
         borderRadius: 4,
         color: "#EFA331",
         backgroundColor: "white",

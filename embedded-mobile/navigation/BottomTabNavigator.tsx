@@ -16,20 +16,20 @@ export default function BottomTabNavigator() {
 
     return (
         <BottomTab.Navigator
-            initialRouteName="TabOne"
+            initialRouteName="Show"
             tabBarOptions={{ activeTintColor: Colors[colorScheme].tint }}>
             <BottomTab.Screen
-                name="TabOne"
+                name="Show"
                 component={TabOneNavigator}
                 options={{
-                    tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
+                    tabBarIcon: ({ color }) => <TabBarIcon name="ios-transgender" color={color} />,
                 }}
             />
             <BottomTab.Screen
-                name="TabTwo"
+                name="Settings"
                 component={TabTwoNavigator}
                 options={{
-                    tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
+                    tabBarIcon: ({ color }) => <TabBarIcon name="ios-build" color={color} />,
                 }}
             />
         </BottomTab.Navigator>
@@ -40,6 +40,7 @@ export default function BottomTabNavigator() {
 // https://icons.expo.fyi/
 function TabBarIcon(props: { name: string; color: string }) {
     return <Ionicons size={30} style={{ marginBottom: -3 }} {...props} />;
+    //return <ToolsIcon size={24} />
 }
 
 // Each tab has its own navigation stack, you can read more about this pattern here:
@@ -52,7 +53,7 @@ function TabOneNavigator() {
             <TabOneStack.Screen
                 name="TabOneScreen"
                 component={MainScreen}
-                options={{ headerTitle: 'Tab One Title' }}
+                options={{ headerTitle: 'Main screen' }}
             />
         </TabOneStack.Navigator>
     );
@@ -66,7 +67,7 @@ function TabTwoNavigator() {
             <TabTwoStack.Screen
                 name="TabTwoScreen"
                 component={ConfigScreen}
-                options={{ headerTitle: 'Tab Two Title' }}
+                options={{ headerTitle: 'Port Settings' }}
             />
         </TabTwoStack.Navigator>
     );
