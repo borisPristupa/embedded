@@ -1,15 +1,15 @@
 import * as React from 'react';
-import {StyleSheet} from 'react-native';
+import {StyleSheet, ImageBackground} from 'react-native';
 import SettingsPort from '../components/SettingsPort';
 import {Text, View} from '../components/Themed';
 
 export default function ConfigScreen() {
     return (
-        <View style={styles.container}>
+        <ImageBackground source={require('../assets/images/default.jpg')} style={styles.container}>
             <Text style={styles.title}>Hello</Text>
             <SettingsPort number='1'/>
             <SettingsPort number='2'/>
-        </View>
+        </ImageBackground>
     );
 }
 
@@ -26,6 +26,6 @@ const styles = StyleSheet.create({
         marginVertical: 3,
         fontWeight: 'bold',
         alignSelf: "center",
-        color: "#005b01",
+        color: "white",
     },
 });
