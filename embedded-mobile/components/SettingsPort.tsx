@@ -6,11 +6,11 @@ import ModalSelector from 'react-native-modal-selector'
 
 
 export default function SettingsPort(props: any) {
-    const [speed, setSpeed] = React.useState(9600)
+    const [speed, setSpeed] = React.useState('9600')
 
     let index = 0;
     const data = [
-        { key: index++, section: true, label: '9600' },
+        { key: index++, label: '9600' },
         { key: index++, label: '19200' },
         { key: index++, label: '38400' },
         { key: index++, label: '57600' },
@@ -28,6 +28,7 @@ export default function SettingsPort(props: any) {
                     initValue="Select port speed!"
                     onChange={(option)=>{ 
                         console.log(option.label);
+                        setSpeed(option.label)
                         }} 
                     animationType={"slide"}
                     selectTextStyle={styles.text}
