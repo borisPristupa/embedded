@@ -48,7 +48,7 @@ fun Application.runServer() {
                         )
                     }
                     else -> {
-                        log.error("data(): 401 - validation error $r")
+                        log.error("data(): 400 - validation error $r")
                         call.respond(HttpStatusCode.BadRequest, r)
                     }
                 }
@@ -74,7 +74,7 @@ fun Application.runServer() {
                             ?: call.respond(HttpStatusCode.OK)
                     }
                     else -> {
-                        log.error("manage(): 401 - validation error $r")
+                        log.error("manage(): 400 - validation error $r")
                         call.respond(HttpStatusCode.BadRequest, r)
                     }
                 }
@@ -97,20 +97,20 @@ fun Application.runServer() {
                         /* val commandChannel = CommandManagement.commandChannel
                         commandChannel.send(CommandRequest(port, state)) */
                         if (state.contains("on")) {
-                            log.debug("New command: port #$port to state On")
+                            log.debug("change_port_state(): New command: port #$port to state On")
                         } else {
-                            log.debug("New command: port #$port to state Off")
+                            log.debug("change_port_state(): New command: port #$port to state Off")
                         }
                         call.respond(HttpStatusCode.OK, "State switched!")
                     }
                     else -> {
-                        log.error("401 - validation error $r")
+                        log.error("change_port_state(): 400 - validation error $r")
                         call.respond(HttpStatusCode.BadRequest, r)
                     }
                 }
             } catch (e: NullPointerException) {
                 log.error("change_port_state(): Illegal url params")
-                log.error("404 - not enough url params - port and state")
+                log.error("change_port_state(): 404 - not enough url params - port and state")
                 call.respond(HttpStatusCode.NotFound, "Request must include port and state")
             } catch (e: IllegalArgumentException) {
                 log.error("change_port_state(): Illegal argument value ::toInt")
