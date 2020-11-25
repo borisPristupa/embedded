@@ -45,5 +45,7 @@ suspend fun main(args: Array<String>): Unit = coroutineScope {
             }
         }
     }
+    /* if we check wi-fi connection -> use 1st line with yours ipv4, else use localhost as default - 2nd line */
+//    embeddedServer(Netty, 8080, "192.168.1.xxx") { runServer() }.start(wait = true)
     embeddedServer(Netty, 8080) { runServer() }.start(wait = true)
 }

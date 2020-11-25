@@ -32,9 +32,7 @@ fun Application.runServer() {
         get("/gps") {
             val channel = UpdateStorage.channel
             val result = CompletableDeferred<Update?>()
-            launch {
-                channel.send(UpdateReadQuery(result, "com1"))
-            }
+            channel.send(UpdateReadQuery(result, "com1"))
             result.await()?.let { r -> call.respond(r) } ?: call.respond(TooEarly, "no actual data")
         }
         get("/data") {
@@ -44,21 +42,19 @@ fun Application.runServer() {
                     null -> {
                         val gpsChannel = UpdateStorage.channel
                         val result = CompletableDeferred<Update?>()
-                        launch {
-                            gpsChannel.send(UpdateReadQuery(result, port))
-                        }
+                        gpsChannel.send(UpdateReadQuery(result, port))
                         result.await()?.let { res -> call.respond(res) } ?: call.respond(
                             TooEarly, "no actual data"
                         )
                     }
                     else -> {
-                        log.error("401 - validation error")
+                        log.error("data(): 401 - validation error $r")
                         call.respond(HttpStatusCode.BadRequest, r)
                     }
                 }
             } catch (e: NullPointerException) {
                 log.error("data(): Illegal url params")
-                log.error("404 - not enough url params")
+                log.error("data(): 404 - not enough url params")
                 call.respond(HttpStatusCode.NotFound, "Request must include port")
             } catch (e: IllegalArgumentException) {
                 log.error("data(): Illegal argument value ::toInt")
@@ -72,17 +68,18 @@ fun Application.runServer() {
                 when (val r = validateParamsForSpeed(port, speed)) {
                     null -> {
                         val commandChannel = CommandManagement.commandChannel
-                        commandChannel.send(CommandRequest(CommandSpeed(port, speed)))
-                        log.debug("New command: port #$port to speed $speed")
-                        call.respond(HttpStatusCode.OK)
+                        val result = CompletableDeferred<String?>()
+                        commandChannel.send(CommandRequest(CommandSpeed(port, speed), result))
+                        result.await()?.let { res -> call.respond(HttpStatusCode.InternalServerError, res) }
+                            ?: call.respond(HttpStatusCode.OK)
                     }
                     else -> {
-                        log.error("401 - validation error")
+                        log.error("manage(): 401 - validation error $r")
                         call.respond(HttpStatusCode.BadRequest, r)
                     }
                 }
             } catch (e: NullPointerException) {
-                log.error("404 - not enough url params - port and speed")
+                log.error("manage(): 404 - not enough url params - port and speed")
                 call.respond(HttpStatusCode.NotFound, "Request must include port and speed")
             } catch (e: IllegalArgumentException) {
                 log.error("manage(): Illegal argument value ::toInt")
@@ -107,7 +104,7 @@ fun Application.runServer() {
                         call.respond(HttpStatusCode.OK, "State switched!")
                     }
                     else -> {
-                        log.error("401 - validation error")
+                        log.error("401 - validation error $r")
                         call.respond(HttpStatusCode.BadRequest, r)
                     }
                 }
