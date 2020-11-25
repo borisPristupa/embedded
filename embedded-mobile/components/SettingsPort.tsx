@@ -7,8 +7,6 @@ import ModalSelector from 'react-native-modal-selector'
 
 export default function SettingsPort(props: any) {
 
-    const image = { uri: "https://reactjs.org/logo-og.png" };
-
     const [speed, setSpeed] = React.useState('9600')
     const [error, setError] = React.useState(false)
 
@@ -37,14 +35,15 @@ export default function SettingsPort(props: any) {
                     cancelStyle={{display:'none'}}
                     onChange={(option)=>{ 
                         setSpeed(option.label);
-                        fetch(`http://localhost:8080//manage?port=${props.number}&speed=${speed}`)
-                            .then(() => setError(false))
+                        fetch(`http://localhost:8080/manage?port=com${props.number}&speed=${speed}`)
+                            .then((responce) => {setError(false);
+                                        alert(responce.status)})
                             .catch((responce)=>{
                                 setError(true);
                                 alert(responce.status);
                                 console.log(responce.status + " "+ props.number+" "+option.label);
                             })
-                        }}
+                    }}
                 /> 
                 
                        
