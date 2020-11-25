@@ -1,48 +1,46 @@
 import * as React from 'react';
-import {ScrollView, StyleSheet} from 'react-native';
+import {ScrollView, StyleSheet, ImageBackground} from 'react-native';
 
 import {Text, View} from '../components/Themed';
 import Optional from '../components/Optional';
+import DataView from '../components/DataView';
 
 export default function MainScreen() {
     return (
-        <View style={styles.container}>
+        <ImageBackground source={require('../assets/images/default.jpg')} style={styles.container}>
             <Text style={styles.title}>Узнай что хочешь!</Text>
             <View style={styles.separator} lightColor="#473" darkColor="rgba(28,156,2,0.1)"/>
             <ScrollView style={styles.scroll}>
-                <Optional btnTitle="Button 1"/>
-                <Optional btnTitle="Button 2"/>
-                <Optional btnTitle="Button 3"/>
+                {/* <Optional/> */}
+                <DataView/>
             </ScrollView>
-        </View>
+        </ImageBackground>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 30,
+        justifyContent: 'center', 
         width: "100%",
         flex: 1,
-        backgroundColor: "#8bc34a"
     },
     title: {
         fontSize: 20,
         marginVertical: 3,
         fontWeight: 'bold',
         alignSelf: "center",
-        color: "#005b01",
+        color: "white",
     },
     separator: {
         height: 3,
         width: "80%",
         marginVertical: 2,
-        //backgroundColor: "blue"
+        backgroundColor: "white",
     },
     scroll: {
         alignContent: 'center',
         width: '100%',
-        backgroundColor: "#8bc34a"
+        //backgroundColor: "#8bc34a"
     },
 });
