@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-class InputOutputContext(private val socket: Socket) {
+class ConnectionContext(private val socket: Socket) {
     private val inputChannel: ByteReadChannel = socket.openReadChannel()
     private val outputChannel: ByteWriteChannel = socket.openWriteChannel(true)
 
@@ -28,9 +28,9 @@ class InputOutputContext(private val socket: Socket) {
     }
 }
 
-/** Starts a tcp server accepting multiple connections and blocks */
+/** Starts a tcp server accepting multiple connections, then blocks */
 @KtorExperimentalAPI
-suspend fun startTcpServer(host: String, port: Int, onConnect: suspend InputOutputContext.() -> Unit) = coroutineScope {
+suspend fun startTcpServer(host: String, port: Int, onConnect: suspend ConnectionContext.() -> Unit) = coroutineScope {
     val serverSocket = aSocket(ActorSelectorManager(Dispatchers.IO))
         .tcp()
         .bind(host, port) {
@@ -40,7 +40,7 @@ suspend fun startTcpServer(host: String, port: Int, onConnect: suspend InputOutp
     while (true) {
         val socket = serverSocket.accept()
         launch {
-            InputOutputContext(socket).onConnect()
+            ConnectionContext(socket).onConnect()
         }
     }
 }
