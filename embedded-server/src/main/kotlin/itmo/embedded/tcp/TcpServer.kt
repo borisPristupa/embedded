@@ -10,7 +10,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-class InputOutputContext(private val inputChannel: ByteReadChannel, private val outputChannel: ByteWriteChannel) {
+class InputOutputContext(private val socket: Socket) {
+    private val inputChannel: ByteReadChannel = socket.openReadChannel()
+    private val outputChannel: ByteWriteChannel = socket.openWriteChannel(true)
+
+    val isClosed: Boolean
+        get() = socket.isClosed
+
     /** Blocks until a new line character is met
      *
      * @throws IOException if the channel have been closed */
@@ -34,9 +40,7 @@ suspend fun startTcpServer(host: String, port: Int, onConnect: suspend InputOutp
     while (true) {
         val socket = serverSocket.accept()
         launch {
-            val input = socket.openReadChannel()
-            val output = socket.openWriteChannel(true)
-            InputOutputContext(input, output).onConnect()
+            InputOutputContext(socket).onConnect()
         }
     }
 }
