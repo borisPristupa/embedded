@@ -53,9 +53,13 @@ suspend fun processCommandQueries(chanel: Channel<CommandRequest> = CommandManag
         println("next command: $element")
         val string = "${element.commandSpeed.port}&${element.commandSpeed.speed}"
         try {
-            sendToController(string)
-            println("manage(): $string")
-            element.result.complete(null)
+            if (sendToController(string)) {
+                println("manage(): $string")
+                element.result.complete(null)
+            } else {
+                println("manage(): tcp connection is closed")
+                element.result.complete("Tcp connection is closed. Speed hasn't been changed")
+            }
         } catch (e: UninitializedPropertyAccessException) {
             println("manage(): no tcp connection found")
             element.result.complete("No tcp connection found. Speed hasn't been changed")

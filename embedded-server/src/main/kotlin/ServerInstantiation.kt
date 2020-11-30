@@ -9,7 +9,7 @@ import model.*
 import java.net.InetAddress
 import java.net.UnknownHostException
 
-const val DEFAULT_TCP_HOST = "192.168.1.2"
+const val DEFAULT_TCP_HOST = "localhost"
 
 fun isValidHost(host: String): Boolean = try {
     InetAddress.getByName(host)
@@ -18,11 +18,11 @@ fun isValidHost(host: String): Boolean = try {
     false
 }
 
-lateinit var sendToController: suspend (String) -> Unit
+lateinit var sendToController: suspend (String) -> Boolean
 
 @KtorExperimentalAPI
 suspend fun main(args: Array<String>): Unit = coroutineScope {
-    val tcpHost = if (args.isNotEmpty() && isValidHost(args[0])) args[0] else DEFAULT_TCP_HOST
+    val host = if (args.isNotEmpty() && isValidHost(args[0])) args[0] else DEFAULT_TCP_HOST
 
     UpdateStorage.createChannel()
     CommandManagement.createChannel()
@@ -33,8 +33,16 @@ suspend fun main(args: Array<String>): Unit = coroutineScope {
         processUpdateQueries()
     }
     launch {
-        startTcpServer(tcpHost, 80) {
-            sendToController = { msg: String -> write(msg) }
+        startTcpServer(host, 80) {
+            sendToController = { msg: String ->
+                var res = true
+                try {
+                    write(msg)
+                } catch (e: IOException) {
+                    res = false
+                }
+                res
+            }
             while (true) {
                 val input = try {
                     readLine()
@@ -45,7 +53,5 @@ suspend fun main(args: Array<String>): Unit = coroutineScope {
             }
         }
     }
-    /* if we check wi-fi connection -> use 1st line with yours ipv4, else use localhost as default - 2nd line */
-//    embeddedServer(Netty, 8080, "192.168.1.xxx") { runServer() }.start(wait = true)
-    embeddedServer(Netty, 8080) { runServer() }.start(wait = true)
+    embeddedServer(Netty, 8080, host) { runServer() }.start(wait = true)
 }
