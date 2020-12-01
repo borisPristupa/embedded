@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {StyleSheet, ImageBackground} from 'react-native';
 import SettingsPort from '../components/SettingsPort';
-import {Text, View} from '../components/Themed';
+import {Text} from '../components/Themed';
 
 export default function ConfigScreen() {
     return (

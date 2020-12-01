@@ -2,7 +2,6 @@ import * as React from 'react';
 import {ScrollView, StyleSheet, ImageBackground} from 'react-native';
 
 import {Text, View} from '../components/Themed';
-import Optional from '../components/Optional';
 import DataView from '../components/DataView';
 
 export default function MainScreen() {
@@ -11,7 +10,6 @@ export default function MainScreen() {
             <Text style={styles.title}>Узнай что хочешь!</Text>
             <View style={styles.separator} lightColor="#473" darkColor="rgba(28,156,2,0.1)"/>
             <ScrollView style={styles.scroll}>
-                {/* <Optional/> */}
                 <DataView/>
             </ScrollView>
         </ImageBackground>
@@ -21,7 +19,7 @@ export default function MainScreen() {
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        justifyContent: 'center', 
+        justifyContent: 'center',
         width: "100%",
         flex: 1,
     },
@@ -41,6 +39,5 @@ const styles = StyleSheet.create({
     scroll: {
         alignContent: 'center',
         width: '100%',
-        //backgroundColor: "#8bc34a"
     },
 });
