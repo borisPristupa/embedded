@@ -17,11 +17,11 @@ object CommandManagement {
     }
 }
 
-//FIXME: порт не так проверять --- не пофиксить, пока нет списка (поменять else branch)
+
 fun validatePort(port: String?): String? {
     return when (port) {
         null -> "Null port isn't allow"
-        else -> if (port in "com1".."com4") null else "Illegal port name: $port. Use comX, X from 1 to 4 "
+        else -> if (port in "com1".."com9") null else "Illegal port name: $port. Use comX, X from 1 to 9 "
     }
 }
 

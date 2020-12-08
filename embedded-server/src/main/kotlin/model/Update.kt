@@ -1,5 +1,6 @@
 package model
 
+import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 
@@ -12,7 +13,9 @@ import kotlinx.coroutines.channels.Channel
  *
  */
 
-data class Update(
+open class Update()
+
+data class Update_gprmc(
     val time: String?,
     val validity: String?,
     val current_latitude: String?,
@@ -25,7 +28,13 @@ data class Update(
     val variation: String?,
     val east_or_west_2: String?,
     val checksum: String?
-)
+) : Update()
+
+data class Update_hehdt(
+    val coordinate: String?,
+    val true_word: String?,
+    val checksum: String?
+) : Update()
 
 open class Query
 class UpdateReadQuery(val result: CompletableDeferred<Update?>, val portNumber: String) : Query()
@@ -54,24 +63,34 @@ object UpdateStorage {
 fun convertNmeaToJson(nmeaText: String): UpdateWriteQuery? {
     try {
         val port = nmeaText.substring(1, nmeaText.indexOf("$"))
+        val type = nmeaText.substring(nmeaText.indexOf("$") + 1, nmeaText.indexOf("$") + 6)
         if (validatePort(port).isNullOrEmpty()) {
             println("new update from port $port")
             val nmeaTextVars = nmeaText.substring(nmeaText.indexOf(",") + 1)
             val varsArray = nmeaTextVars.split(",")
-            val update = Update(
-                varsArray[0],
-                varsArray[1],
-                varsArray[2],
-                varsArray[3],
-                varsArray[4],
-                varsArray[5],
-                varsArray[6],
-                varsArray[7],
-                varsArray[8],
-                varsArray[9],
-                varsArray[10].substring(0, 1),
-                varsArray[10].substring(1)
-            )
+            var update = Update()
+            if (type.toLowerCase().equals("gprmc")) {
+                update = Update_gprmc(
+                    varsArray[0],
+                    varsArray[1],
+                    varsArray[2],
+                    varsArray[3],
+                    varsArray[4],
+                    varsArray[5],
+                    varsArray[6],
+                    varsArray[7],
+                    varsArray[8],
+                    varsArray[9],
+                    varsArray[10].substring(0, 1),
+                    varsArray[10].substring(1)
+                )
+            } else {
+                update = Update_hehdt(
+                    varsArray[0],
+                    varsArray[1].substring(0, 1),
+                    varsArray[1].substring(1)
+                )
+            }
             return UpdateWriteQuery(update, port)
         } else {
             // todo() log.error()
@@ -86,7 +105,9 @@ fun convertNmeaToJson(nmeaText: String): UpdateWriteQuery? {
 }
 
 /*fun main(args: Array<String>) {
-    val query = convertNmeaToJson("<com1\$GPRMC,081836,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E*62")
+    var query = convertNmeaToJson("<com1\$GPRMC,081836,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E*62")
+    print(Gson().toJson(query))
+    query = convertNmeaToJson("<com1\$HEHDT,192.0,T*25")
     print(Gson().toJson(query))
 }*/
 
