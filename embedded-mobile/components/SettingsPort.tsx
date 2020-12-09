@@ -28,7 +28,9 @@ export default function SettingsPort(props: any) {
                     setTimeout(() => createAlert(),1000);
                 }
             })
-            .catch(() => setError(true))
+            .catch(() => {
+                setError(true);
+                setTimeout(() => createAlert(),1000);})
     }
 
     return (
