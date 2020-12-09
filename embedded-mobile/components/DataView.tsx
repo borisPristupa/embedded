@@ -3,31 +3,65 @@ import {Text, View} from './Themed';
 import {StyleSheet} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {useEffect, useState} from "react";
+import ModalSelector from "react-native-modal-selector";
 
 const pics = ["ios-partly-sunny", "ios-locate", "ios-thermometer", "ios-expand", "ios-airplane"]
+const ports = [
+    {key: '1', label: '1'},
+    {key: '2', label: '2'},
+    {key: '3', label: '3'},
+    {key: '4', label: '4'},
+    {key: '5', label: '5'},
+    {key: '6', label: '6'},
+]
 
-export default function DataView(props: any) {
+export default function DataView() {
     const [data, setData] = useState<Object>({})
-    const [error, setError] = useState(false)
+    const [portNum, setPortNum] = useState('1')
 
-    const requestData = () => setTimeout(() => {
-        fetch('http://192.168.0.40:8080/gps')
+    const [error, setError] = useState(false)
+    const [requestNum, setRequestNum] = useState(1)
+
+    const fetchData = (url: string) => {
+        fetch(url)
             .then(response => response.json())
             .then(text => setData(text))
             .then(() => setError(false))
-            .then(() => requestData())
+            .then(() => setRequestNum(requestNum + 1))
             .catch(() => {
                 setError(true)
-                requestData()
+                setRequestNum(requestNum + 1)
+                setData({})
             });
-    }, 1000)
+    }
 
     useEffect(() => {
-        requestData()
-    }, [])
+        const url = `http://192.168.0.40:8080/data?port=com${portNum}`
+        const timer = setTimeout(() => fetchData(url), 1000)
+        return () => clearTimeout(timer)
+    }, [requestNum])
+
+    const onChangePort = (option: any) => {
+        setPortNum(() => option.key)
+        setRequestNum(0)
+    }
 
     return (
         <View style={styles.main}>
+            <Text>
+                <Text>Port:</Text>
+                <ModalSelector
+                    data={ports}
+                    initValue={portNum}
+                    animationType="slide"
+                    selectTextStyle={styles.text}
+                    // selectStyle={styles.selectModel}
+                    touchableStyle={styles.touch}
+                    backdropPressToClose={true}
+                    cancelStyle={{display: 'none'}}
+                    onChange={onChangePort}
+                />
+            </Text>
             {Object.entries(data).map(([key, value]) => (
                 <View key={key} style={styles.dataBlock}>
                     <Text style={styles.title}>{key}:</Text>
@@ -65,6 +99,12 @@ const styles = StyleSheet.create({
     value: {
         color: "white",
         margin: 5,
+    },
+    text: {
+        color: 'white',
+    },
+    touch: {
+        marginLeft: 5
     }
 });
 
