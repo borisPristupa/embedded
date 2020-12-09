@@ -19,7 +19,7 @@ export default function SettingsPort(props: any) {
 
     const onChange = (option: any) => {
         console.log(option)
-        fetch(`http://192.168.0.100:8080/manage?port=com${props.number}&speed=${option.label}`)
+        fetch(`http://192.168.0.40:8080/manage?port=com${props.number}&speed=${option.label}`)
             .then((response) => {
                 setError(false);
                 if (response.status !== 200) {

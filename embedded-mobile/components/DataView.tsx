@@ -11,7 +11,7 @@ export default function DataView(props: any) {
     const [error, setError] = useState(false)
 
     const requestData = () => setTimeout(() => {
-        fetch('http://192.168.0.100:8080/gps')
+        fetch('http://192.168.0.40:8080/gps')
             .then(response => response.json())
             .then(text => setData(text))
             .then(() => setError(false))
