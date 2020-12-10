@@ -28,12 +28,6 @@ fun Application.runServer() {
         anyHost()
     }
     routing {
-        get("/gps") {
-            val channel = UpdateStorage.channel
-            val result = CompletableDeferred<Update?>()
-            channel.send(UpdateReadQuery(result, "com1"))
-            result.await()?.let { r -> call.respond(r) } ?: call.respond(TooEarly, "no actual data")
-        }
         get("/data") {
             try {
                 val port = call.parameters["port"]!!

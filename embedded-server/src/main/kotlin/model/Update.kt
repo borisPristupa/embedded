@@ -45,7 +45,6 @@ class UpdateWriteQuery(val update: Update, val portNumber: String) : Query()
  * - получение данных для порта.
  */
 object UpdateStorage {
-    private var lastUpdate: Update? = null
     lateinit var channel: Channel<Query>
     private val dataMap = mutableMapOf<String, Update?>()
 
@@ -55,7 +54,6 @@ object UpdateStorage {
 
     fun update(portNumber: String, newUpdate: Update) {
         dataMap[portNumber] = newUpdate
-        lastUpdate = newUpdate
     }
 
     fun getUpdate(portNumber: String): Update? {
