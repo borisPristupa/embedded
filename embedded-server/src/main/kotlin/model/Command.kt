@@ -17,7 +17,7 @@ object CommandManagement {
     }
 }
 
-
+// ВАЛИДАЦИЯ порта, скорости, состояния
 fun validatePort(port: String?): String? {
     return when (port) {
         null -> "Null port isn't allow"
@@ -47,7 +47,15 @@ fun validateParamsForState(port: String?, state: String): String? {
     }
 }
 
-// todo() write to log file
+/**
+ * Снова корутины :)
+ * логика аналогична той, что используется в Update.kt с тем лишь отчличием, что всего один тип запроса: CommandRequest
+ *
+ * Цель: предотвращение одновременного запроса на изменение скорости одного и того же порта
+ *
+ * Логика: от http-клиента приходит запрос, встает в очередь на обработку.
+ *      Обработчик считывает запрос, пытается отправить контроллеру (если не успешно -> пользователь об этом узнает).
+ */
 suspend fun processCommandQueries(chanel: Channel<CommandRequest> = CommandManagement.commandChannel) {
     for (element in chanel) {
         println("next command: $element")
@@ -64,6 +72,5 @@ suspend fun processCommandQueries(chanel: Channel<CommandRequest> = CommandManag
             println("manage(): no tcp connection found")
             element.result.complete("No tcp connection found. Speed hasn't been changed")
         }
-
     }
 }

@@ -12,8 +12,7 @@ import model.*
 
 /**
  *  REQUESTS:
- * /gps - old version for version compatibility - no params
- * /data - new version. Port::String (now - "comX", where X - number from 1 to 4, port name maybe will change)
+ * /data - port::String (now - "comX", where X - number from 1 to 4, port name maybe will change) - get update by port
  *
  * /manage - change speed for specified port. Port::String, Speed::Int
  * /change_port_state - change port state. Port::String, State::Boolean - True:on, False:Off
@@ -86,6 +85,7 @@ fun Application.runServer() {
                 call.respond(HttpStatusCode.BadRequest, "Check parameters. Post is string, speed is number")
             }
         }
+//            Возможное расщирение - включение/выключение порта.
         get("/change_port_state") {
             try {
                 val port = call.parameters["port"]!!
