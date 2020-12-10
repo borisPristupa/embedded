@@ -13,6 +13,10 @@ import kotlinx.coroutines.channels.Channel
 // basic class for parsed data, below is gprmc & hehdt child-classes
 open class Update()
 
+/*
+ GPRMC info
+ String example: <com1$GPRMC,081836,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E*62
+ */
 data class Update_gprmc(
     val time: String?,
     val validity: String?,
@@ -28,6 +32,10 @@ data class Update_gprmc(
     val checksum: String?
 ) : Update()
 
+/*
+ HEHDT info
+ String example: <com1$HEHDT,192.0,T*25
+ */
 data class Update_hehdt(
     val coordinate: String?,
     val true_word: String?,
@@ -61,7 +69,11 @@ object UpdateStorage {
     }
 }
 
-// ПАРСЕР
+/**
+ * Parser function
+ * Converts NMEA string (GPRMC and HEHDT) to Object Update() depends on message type
+ * Returns UpdateWriteQuery object with parsed string and port number
+ */
 fun convertNmeaToJson(nmeaText: String): UpdateWriteQuery? {
     try {
         val port = nmeaText.substring(1, nmeaText.indexOf("$"))
@@ -105,13 +117,6 @@ fun convertNmeaToJson(nmeaText: String): UpdateWriteQuery? {
         return null
     }
 }
-
-/*fun main(args: Array<String>) {
-    var query = convertNmeaToJson("<com1\$GPRMC,081836,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E*62")
-    print(Gson().toJson(query))
-    query = convertNmeaToJson("<com1\$HEHDT,192.0,T*25")
-    print(Gson().toJson(query))
-}*/
 
 /**
  * !!! КОРУТИНЫ ~ легковесные потоки
