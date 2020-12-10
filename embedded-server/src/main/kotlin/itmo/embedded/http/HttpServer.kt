@@ -7,7 +7,6 @@ import io.ktor.http.*
 import io.ktor.routing.*
 import io.ktor.gson.*
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.launch
 import model.*
 
 /**
@@ -28,6 +27,15 @@ fun Application.runServer() {
         anyHost()
     }
     routing {
+        /**
+         * Endpoints description:
+         * 1) /data
+         * - mapping to /data
+         * - try to parse arguments
+         *      if null -> 404 - not found
+         *      if smth strange (can't read as int or validation faild -> 401 - bad request
+         * - if success: put UpdateReadRequest in channel and wait for result
+         */
         get("/data") {
             try {
                 val port = call.parameters["port"]!!
@@ -54,6 +62,10 @@ fun Application.runServer() {
                 call.respond(HttpStatusCode.BadRequest, "Check parameters. Must be numbers")
             }
         }
+        /**
+         *2) /manage - change speed of port
+         * again try to parse args, validate, put in channel, wait result
+         */
         get("/manage") {
             try {
                 val port = call.parameters["port"]!!
