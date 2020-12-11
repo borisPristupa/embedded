@@ -28,7 +28,9 @@ export default function SettingsPort(props: any) {
                     setTimeout(() => createAlert(),1000);
                 }
             })
-            .catch(() => setError(true))
+            .catch(() => {
+                setError(true);
+                setTimeout(() => createAlert(),1000);})
     }
 
     return (
@@ -62,11 +64,12 @@ const createAlert = () => {
 
 const styles = StyleSheet.create({
     ch_box: {
-        width: '95%',
-        backgroundColor: '#fff',
-        margin: 3,
+        width: '80%',
+        // backgroundColor: '#E5E8F0',
+        backgroundColor: 'rgba(229,232,240, 0.5)',
+        margin: 10,
         borderRadius: 5,
-
+        alignSelf:'center',
     },
     selectModel: {
         backgroundColor: '#2B2E4A',
@@ -90,7 +93,7 @@ const styles = StyleSheet.create({
         width: '50%',
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#000',
+        color: '#FFF',
     },
 });
 

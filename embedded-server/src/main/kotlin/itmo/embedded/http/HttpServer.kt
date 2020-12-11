@@ -7,13 +7,11 @@ import io.ktor.http.*
 import io.ktor.routing.*
 import io.ktor.gson.*
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.launch
 import model.*
 
 /**
  *  REQUESTS:
- * /gps - old version for version compatibility - no params
- * /data - new version. Port::String (now - "comX", where X - number from 1 to 4, port name maybe will change)
+ * /data - port::String (now - "comX", where X - number from 1 to 4, port name maybe will change) - get update by port
  *
  * /manage - change speed for specified port. Port::String, Speed::Int
  * /change_port_state - change port state. Port::String, State::Boolean - True:on, False:Off
@@ -29,12 +27,15 @@ fun Application.runServer() {
         anyHost()
     }
     routing {
-        get("/gps") {
-            val channel = UpdateStorage.channel
-            val result = CompletableDeferred<Update?>()
-            channel.send(UpdateReadQuery(result, "com1"))
-            result.await()?.let { r -> call.respond(r) } ?: call.respond(TooEarly, "no actual data")
-        }
+        /**
+         * Endpoints description:
+         * 1) /data
+         * - mapping to /data
+         * - try to parse arguments
+         *      if null -> 404 - not found
+         *      if smth strange (can't read as int or validation faild -> 401 - bad request
+         * - if success: put UpdateReadRequest in channel and wait for result
+         */
         get("/data") {
             try {
                 val port = call.parameters["port"]!!
@@ -61,6 +62,10 @@ fun Application.runServer() {
                 call.respond(HttpStatusCode.BadRequest, "Check parameters. Must be numbers")
             }
         }
+        /**
+         *2) /manage - change speed of port
+         * again try to parse args, validate, put in channel, wait result
+         */
         get("/manage") {
             try {
                 val port = call.parameters["port"]!!
@@ -86,6 +91,7 @@ fun Application.runServer() {
                 call.respond(HttpStatusCode.BadRequest, "Check parameters. Post is string, speed is number")
             }
         }
+//            Возможное расщирение - включение/выключение порта.
         get("/change_port_state") {
             try {
                 val port = call.parameters["port"]!!
