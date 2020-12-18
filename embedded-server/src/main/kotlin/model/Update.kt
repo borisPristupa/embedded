@@ -1,7 +1,9 @@
 package model
 
+import com.google.gson.Gson
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
+import kotlin.math.roundToInt
 
 /**
  * От stm раз в секунду (+/-) приходит сообщение с новыми данными
@@ -19,17 +21,13 @@ open class Update()
  */
 data class Update_gprmc(
     val time: String?,
-    val validity: String?,
+    val status: String?,
     val current_latitude: String?,
-    val north_or_south: String?,
     val current_longitude: String?,
-    val east_or_west: String?,
     val speed_in_knots: String?,
     val true_course: String?,
     val ut_date: String?,
-    val variation: String?,
-    val east_or_west_2: String?,
-    val checksum: String?
+    val magnite_variation: String?
 ) : Update()
 
 /*
@@ -38,8 +36,7 @@ data class Update_gprmc(
  */
 data class Update_hehdt(
     val coordinate: String?,
-    val true_word: String?,
-    val checksum: String?
+    val true_word: String?
 ) : Update()
 
 //basic class for queries: it's used for channels and two child-classes
@@ -85,37 +82,39 @@ fun convertNmeaToJson(nmeaText: String): UpdateWriteQuery? {
             var update = Update()
             if (type.toLowerCase().equals("gprmc")) {
                 update = Update_gprmc(
-                    varsArray[0],
-                    varsArray[1],
-                    varsArray[2],
-                    varsArray[3],
-                    varsArray[4],
-                    varsArray[5],
-                    varsArray[6],
-                    varsArray[7],
-                    varsArray[8],
-                    varsArray[9],
-                    varsArray[10].substring(0, 1),
-                    varsArray[10].substring(1)
+                    varsArray[0].substring(0,2) + ":" + varsArray[0].substring(2,4) + ":"+ varsArray[0].substring(4),
+                    if (varsArray[1].toLowerCase() == "a") "Active" else "Ignored",
+                    "Lat " + convertToDegreeAndMinutes(varsArray[2]) + varsArray[3],
+                    "Long " + convertToDegreeAndMinutes(varsArray[4]) + varsArray[5],
+                    varsArray[6] + " knots",
+                    varsArray[7] + "°",
+                    varsArray[8].substring(0,2) + "." + varsArray[8].substring(2,4) + "."+ varsArray[8].substring(4),
+                    varsArray[9] + " " + varsArray[10].substring(0, 1)
                 )
             } else {
                 update = Update_hehdt(
                     varsArray[0],
-                    varsArray[1].substring(0, 1),
-                    varsArray[1].substring(1)
+                    varsArray[1].substring(0, 1)
                 )
             }
             return UpdateWriteQuery(update, port)
         } else {
-            // todo() log.error()
-            println("parse: illegal port")
+            System.err.println("parse: illegal port")
             return null
         }
     } catch (e: StringIndexOutOfBoundsException) {
-        // todo() log.error()
-        println("parse failed - illegal vars number")
+        System.err.println("parse failed - illegal vars number")
         return null
     }
+}
+
+/**
+ * Convert string like 4807.038 to 48° 07' 2''
+ */
+fun convertToDegreeAndMinutes(value: String): String {
+    return value.substring(0, value.indexOf(".") - 2) + "° " +
+            value.substring(value.indexOf(".") - 2, value.indexOf(".")) + "' " +
+            (("0." + value.substring(value.indexOf(".") + 1)).toDouble() * 60).roundToInt() + "'' ";
 }
 
 /**
@@ -142,9 +141,3 @@ suspend fun processUpdateQueries(chanel: Channel<Query> = UpdateStorage.channel)
         }
     }
 }
-
-/**
- * test data!!!
- * <com1$GPGSV,3,1,11,10,63,137,17,07,61,098,15,05,59,290,20,08,54,157,30*70
- * <com1$GPGSV,2,1,07,04,62,120,47,09,52,292,53,07,42,044,41,24,38,179,45*7B
- */
