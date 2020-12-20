@@ -4,7 +4,6 @@ import {StyleSheet} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {useEffect, useState} from "react";
 import ModalSelector from "react-native-modal-selector";
-import {getCurrentTime} from "./utils/getCurrentTime";
 
 const pics = ["ios-partly-sunny", "ios-locate", "ios-thermometer", "ios-expand", "ios-airplane"]
 const ports = [
@@ -51,8 +50,6 @@ export default function DataView() {
         setRequestNum(0)
     }
 
-    console.log(data)
-
     return (
         <View style={styles.main}>
             <Text>
@@ -69,13 +66,6 @@ export default function DataView() {
                     onChange={onChangePort}
                 />
             </Text>
-            {data.time && (
-                <View style={styles.dataBlock}>
-                    <Text style={styles.title}>Time:</Text>
-                    <Text style={styles.value}>{getCurrentTime(Number(data.time))}</Text>
-                    <Ionicons name="ios-time" size={48} color="white"/>
-                </View>
-            )}
             {Object.entries(data).map(([key, value]) => (
                 <View key={key} style={styles.dataBlock}>
                     <Text style={styles.title}>{key}:</Text>
